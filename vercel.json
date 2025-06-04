@@ -4,5 +4,10 @@
       "runtime": "@vercel/node@3.0.7"
     }
   },
-  "regions": ["iad1"]
+  "regions": ["iad1"],
+  "build": {
+    "env": {
+      "NODE_VERSION": "20.x"
+    }
+  }
 }
