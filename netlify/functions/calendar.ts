@@ -33,13 +33,21 @@ export const handler = async (event: any, context: any) => {
   }
 
   try {
-    const response = await fetch(calendarUrl);
+    const response = await fetch(calendarUrl, {
+      headers: {
+        'Accept': 'text/calendar; charset=utf-8',
+        'Accept-Charset': 'utf-8'
+      }
+    });
     
     if (!response.ok) {
       throw new Error(`Calendar fetch failed: ${response.status}`);
     }
 
-    const icalData = await response.text();
+    // Get as buffer first to handle encoding properly
+    const arrayBuffer = await response.arrayBuffer();
+    const decoder = new TextDecoder('utf-8');
+    const icalData = decoder.decode(arrayBuffer);
     
     return {
       statusCode: 200,
