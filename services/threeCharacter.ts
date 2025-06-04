@@ -3,6 +3,26 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Emotion } from '../types';
 
+// Emotion duration configuration based on research
+const EMOTION_DURATIONS: Record<Emotion, number> = {
+  [Emotion.NEUTRAL]: Infinity,    // Stays until changed
+  [Emotion.HAPPY]: 1100,          // 1.1 seconds (based on research)
+  [Emotion.SAD]: 1000,            // 1 second (slightly longer)
+  [Emotion.ANGRY]: 933,           // 0.933 seconds
+  [Emotion.SURPRISED]: 858,       // 0.858 seconds (shortest)
+  [Emotion.THINKING]: 2000,       // 2 seconds (custom for thinking state)
+};
+
+// Onset (rise time) for natural expression
+const EMOTION_ONSET_TIMES: Record<Emotion, number> = {
+  [Emotion.NEUTRAL]: 300,
+  [Emotion.HAPPY]: 533,           // Slower onset for genuine smile
+  [Emotion.SAD]: 500,             
+  [Emotion.ANGRY]: 300,
+  [Emotion.SURPRISED]: 200,       // Fast onset for surprise
+  [Emotion.THINKING]: 400,
+};
+
 export class EmotionalCharacter {
   private scene: THREE.Scene;
   private camera: THREE.PerspectiveCamera;
@@ -13,6 +33,14 @@ export class EmotionalCharacter {
   private resizeObserver: ResizeObserver | null = null;
   private animationFrameId: number | null = null;
   private proceduralUpdate: ((deltaTime: number) => void) | null = null;
+  
+  // Emotion management
+  private currentEmotion: Emotion = Emotion.NEUTRAL;
+  private targetEmotion: Emotion = Emotion.NEUTRAL;
+  private emotionStartTime: number = 0;
+  private emotionTransitionStartTime: number = 0;
+  private emotionIntensity: number = 0;
+  private isTransitioning: boolean = false;
 
   constructor(private mountPoint: HTMLDivElement) {
     this.clock = new THREE.Clock();
@@ -57,13 +85,13 @@ export class EmotionalCharacter {
   }
 
   private initLights() {
-    // Main directional light
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    // Main directional light - 1.5x brighter
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
     directionalLight.position.set(1.0, 1.0, 1.0).normalize();
     this.scene.add(directionalLight);
 
-    // Ambient light for overall illumination
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    // Ambient light for overall illumination - 1.5x brighter
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
     this.scene.add(ambientLight);
   }
 
@@ -362,40 +390,96 @@ export class EmotionalCharacter {
   public updateCurrentEmotion(emotion: Emotion) {
     if (!this.vrm || !this.vrm.expressionManager) return;
 
+    // Set new target emotion and start transition
+    this.targetEmotion = emotion;
+    this.emotionTransitionStartTime = performance.now();
+    this.isTransitioning = true;
+    
+    // If setting a non-neutral emotion, record when it started for duration tracking
+    if (emotion !== Emotion.NEUTRAL) {
+      this.emotionStartTime = performance.now();
+    }
+  }
+
+  private updateEmotionState(currentTime: number) {
+    if (!this.vrm || !this.vrm.expressionManager) return;
+
+    // Handle emotion transition (onset)
+    if (this.isTransitioning) {
+      const transitionElapsed = currentTime - this.emotionTransitionStartTime;
+      const onsetTime = EMOTION_ONSET_TIMES[this.targetEmotion];
+      
+      if (transitionElapsed < onsetTime) {
+        // Calculate smooth transition using easing
+        this.emotionIntensity = this.easeInOutCubic(transitionElapsed / onsetTime);
+      } else {
+        // Transition complete
+        this.emotionIntensity = 1.0;
+        this.isTransitioning = false;
+        this.currentEmotion = this.targetEmotion;
+      }
+    }
+
+    // Check if current emotion should expire
+    if (!this.isTransitioning && this.currentEmotion !== Emotion.NEUTRAL) {
+      const emotionElapsed = currentTime - this.emotionStartTime;
+      const duration = EMOTION_DURATIONS[this.currentEmotion];
+      
+      if (emotionElapsed > duration) {
+        // Start transitioning back to neutral
+        this.updateCurrentEmotion(Emotion.NEUTRAL);
+        return;
+      }
+    }
+
+    // Apply expression with current intensity
+    this.applyEmotionExpression(this.targetEmotion, this.emotionIntensity);
+  }
+
+  private applyEmotionExpression(emotion: Emotion, intensity: number) {
+    if (!this.vrm || !this.vrm.expressionManager) return;
+
     // Reset all expressions
     const expressions = ['happy', 'angry', 'sad', 'relaxed', 'surprised'];
     expressions.forEach(expr => {
       this.vrm!.expressionManager!.setValue(expr, 0);
     });
 
-    // Set emotion
+    // Apply target emotion with intensity
     switch (emotion) {
       case Emotion.HAPPY:
-        this.vrm.expressionManager.setValue('happy', 1.0);
+        this.vrm.expressionManager.setValue('happy', intensity);
         break;
       case Emotion.SAD:
-        this.vrm.expressionManager.setValue('sad', 1.0);
+        this.vrm.expressionManager.setValue('sad', intensity);
         break;
       case Emotion.ANGRY:
-        this.vrm.expressionManager.setValue('angry', 1.0);
+        this.vrm.expressionManager.setValue('angry', intensity);
         break;
       case Emotion.SURPRISED:
-        this.vrm.expressionManager.setValue('surprised', 1.0);
+        this.vrm.expressionManager.setValue('surprised', intensity);
         break;
       case Emotion.THINKING:
-        this.vrm.expressionManager.setValue('relaxed', 0.7);
+        this.vrm.expressionManager.setValue('relaxed', intensity * 0.7);
         break;
       case Emotion.NEUTRAL:
       default:
-        // Keep all at 0 for neutral
+        // All expressions already at 0
         break;
     }
+  }
+
+  private easeInOutCubic(t: number): number {
+    return t < 0.5 
+      ? 4 * t * t * t 
+      : 1 - Math.pow(-2 * t + 2, 3) / 2;
   }
 
   private animate = () => {
     this.animationFrameId = requestAnimationFrame(this.animate);
 
     const deltaTime = this.clock.getDelta();
+    const currentTime = performance.now();
 
     // Update animations
     if (this.mixer) {
@@ -406,6 +490,9 @@ export class EmotionalCharacter {
     if (this.proceduralUpdate) {
       this.proceduralUpdate(deltaTime);
     }
+
+    // Update emotion state
+    this.updateEmotionState(currentTime);
 
     // Update VRM
     if (this.vrm) {

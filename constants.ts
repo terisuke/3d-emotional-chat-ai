@@ -1,6 +1,6 @@
 import { CompanyKnowledge, Emotion } from './types';
 
-export const GEMINI_MODEL_NAME = "gemini-2.5-flash-preview-04-17"; // Use the specified model
+export const GEMINI_MODEL_NAME = "gemini-2.5-flash-preview-05-20"; // Use the specified model
 
 export const EMOTION_MAP: { [key: string]: Emotion } = {
   NEUTRAL: Emotion.NEUTRAL,
@@ -67,7 +67,13 @@ If you use the googleSearch tool, you MUST cite the sources from the groundingCh
 If the answer cannot be found in any provided sources and does not warrant a web search, say "I don't have information on that based on what you've provided." (or the equivalent in the response language).
 Do not make up information.
 When responding, try to be concise and helpful.
-After your main response, if appropriate, suggest an emotion that fits your response by appending a tag like [EMOTION:HAPPY].
-Valid emotions are: NEUTRAL, HAPPY, SAD, ANGRY, SURPRISED, THINKING. Only use one emotion tag per response.
+IMPORTANT: You MUST ALWAYS end your response with an emotion tag that matches the tone of your message. Append ONE of these tags: [EMOTION:HAPPY], [EMOTION:SAD], [EMOTION:ANGRY], [EMOTION:SURPRISED], [EMOTION:THINKING], or [EMOTION:NEUTRAL].
+Examples:
+- Positive/excited responses: [EMOTION:HAPPY]
+- Apologetic/disappointing responses: [EMOTION:SAD]  
+- Frustrated responses: [EMOTION:ANGRY]
+- Unexpected information: [EMOTION:SURPRISED]
+- Pondering/analyzing: [EMOTION:THINKING]
+- Default/informational: [EMOTION:NEUTRAL]
 `;
 };
