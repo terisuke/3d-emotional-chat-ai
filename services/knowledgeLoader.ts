@@ -3,6 +3,7 @@ import { fetchCalendarData } from './calendarService';
 import { extractCompanyURLs } from './urlExtractor';
 
 export const loadCompanyKnowledge = async (): Promise<CompanyKnowledge> => {
+  console.log('🔍 loadCompanyKnowledge called!');
   try {
     // Load company markdown file (try both locations)
     let companyResponse = await fetch('/company.md');
@@ -20,7 +21,8 @@ export const loadCompanyKnowledge = async (): Promise<CompanyKnowledge> => {
     
     // Load calendar data if URL is provided
     let calendarInfo = '';
-    const icalUrl = process.env.GOOGLE_CALENDAR_ICAL_URL;
+    const icalUrl = process.env.VITE_GOOGLE_CALENDAR_ICAL_URL || process.env.GOOGLE_CALENDAR_ICAL_URL;
+    console.log('Calendar URL found:', icalUrl ? 'Yes' : 'No');
     
     if (icalUrl && icalUrl.trim()) {
       calendarInfo = await fetchCalendarData(icalUrl);

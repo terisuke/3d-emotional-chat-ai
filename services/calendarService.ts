@@ -102,11 +102,15 @@ const getMockCalendarData = (): string => {
 };
 
 export const fetchCalendarData = async (icalUrl: string): Promise<string> => {
+  console.log('fetchCalendarData called with URL:', icalUrl);
+  
   // In development mode, return mock data to avoid CORS issues
   if (isDevelopment()) {
     console.log('Development mode: Using mock calendar data');
     return getMockCalendarData();
   }
+  
+  console.log('Production mode: Attempting to fetch real calendar data');
   
   try {
     // Use proxy API in production to avoid CORS issues

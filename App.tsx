@@ -27,8 +27,20 @@ const App: React.FC = () => {
   // Load company knowledge on component mount
   useEffect(() => {
     const loadKnowledge = async () => {
-      const knowledge = await loadCompanyKnowledge();
-      setCompanyKnowledge(knowledge);
+      try {
+        console.log('🚀 Starting to load company knowledge...');
+        const knowledge = await loadCompanyKnowledge();
+        console.log('✅ Company knowledge loaded:', knowledge);
+        setCompanyKnowledge(knowledge);
+      } catch (error) {
+        console.error('❌ Error loading company knowledge:', error);
+        // Set fallback data
+        setCompanyKnowledge({
+          markdownContent: '# Company Information\nError loading company data.',
+          calendarInfo: '## Calendar: Error loading calendar data.',
+          companyUrls: []
+        });
+      }
     };
     loadKnowledge();
   }, []);
