@@ -149,6 +149,7 @@ export const fetchCalendarData = async (icalUrl: string): Promise<string> => {
     const upcomingEvents = events
       .filter(event => {
         const isUpcoming = event.dtstart >= now && event.dtstart <= thirtyDaysFromNow;
+        console.log(`🔍 Event check: "${event.summary}" at ${event.dtstart.toISOString()} - ${isUpcoming ? 'UPCOMING' : 'NOT upcoming'}`);
         if (isUpcoming) {
           console.log('✅ Upcoming event:', event.summary, event.dtstart.toISOString());
         }
