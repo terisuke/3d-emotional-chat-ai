@@ -18,8 +18,8 @@ const parseICalDate = (dateStr: string): Date => {
     const result = new Date(year, month, day);
     console.log(`📅 All-day date parsed: ${result.toISOString()}`);
     return result;
-  } else if (dateStr.length === 15 && dateStr.endsWith('Z')) {
-    // YYYYMMDDTHHMMSSZ format
+  } else if ((dateStr.length === 15 || dateStr.length === 16) && dateStr.endsWith('Z')) {
+    // YYYYMMDDTHHMMSSZ format (15 or 16 characters)
     const year = parseInt(dateStr.substr(0, 4));
     const month = parseInt(dateStr.substr(4, 2)) - 1;
     const day = parseInt(dateStr.substr(6, 2));
