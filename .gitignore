@@ -23,5 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 
-*.vrm
-*.vrma
+# VRM files are now included for deployment
+# *.vrm
+# *.vrma

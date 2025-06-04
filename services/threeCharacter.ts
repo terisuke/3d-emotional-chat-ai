@@ -100,7 +100,28 @@ export class EmotionalCharacter {
       const loader = new GLTFLoader();
       loader.register((parser) => new VRMLoaderPlugin(parser));
 
-      const gltf = await loader.loadAsync('/assets/vrm/クラウディア.vrm');
+      // Try multiple VRM files with fallback
+      let gltf;
+      const vrmPaths = [
+        '/assets/vrm/クラウディア.vrm',
+        '/assets/vrm/sakura.vrm',
+        '/assets/vrm/AvatarSample_B.vrm'
+      ];
+      
+      for (const path of vrmPaths) {
+        try {
+          gltf = await loader.loadAsync(path);
+          console.log(`Successfully loaded VRM from: ${path}`);
+          break;
+        } catch (error) {
+          console.log(`Failed to load VRM from: ${path}`);
+          continue;
+        }
+      }
+      
+      if (!gltf) {
+        throw new Error('No VRM files could be loaded');
+      }
       const vrm = gltf.userData.vrm as VRM;
 
       if (!vrm) {

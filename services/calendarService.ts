@@ -109,7 +109,9 @@ export const fetchCalendarData = async (icalUrl: string): Promise<string> => {
   }
   
   try {
-    const response = await fetch(icalUrl);
+    // Use proxy API in production to avoid CORS issues
+    const proxyUrl = '/api/calendar';
+    const response = await fetch(proxyUrl);
     if (!response.ok) {
       throw new Error(`Failed to fetch calendar: ${response.status}`);
     }
