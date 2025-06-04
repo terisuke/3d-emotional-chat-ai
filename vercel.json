@@ -1,0 +1,14 @@
+{
+  "functions": {
+    "api/gemini.ts": {
+      "runtime": "nodejs18.x",
+      "regions": ["iad1"]
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/gemini",
+      "destination": "/api/gemini"
+    }
+  ]
+}

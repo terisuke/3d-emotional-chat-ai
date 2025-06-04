@@ -41,6 +41,9 @@ const extractSources = (groundingMetadata?: GroundingMetadata): Source[] => {
 };
 
 
+// Use proxy API in production for better Google Search support
+// const USE_PROXY_API = process.env.NODE_ENV === 'production';
+
 export const askGemini = async (
   prompt: string,
   knowledge: CompanyKnowledge,
@@ -80,6 +83,8 @@ ${companySearchResults}
 ` : ''}
 `;
 
+  // Google Search is now available in US and Europe (as of Dec 2024)
+  // Enable Google Search grounding
   const tools: Tool[] = [{ googleSearch: {} }];
 
   const request: GenerateContentParameters = {
