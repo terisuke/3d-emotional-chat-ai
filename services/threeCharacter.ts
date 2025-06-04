@@ -1,6 +1,6 @@
+import { VRM, VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { VRMLoaderPlugin, VRMUtils, VRM } from '@pixiv/three-vrm';
 import { Emotion } from '../types';
 
 export class EmotionalCharacter {
