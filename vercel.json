@@ -1,14 +1,8 @@
 {
   "functions": {
-    "api/gemini.ts": {
-      "runtime": "nodejs18.x"
+    "api/*.ts": {
+      "runtime": "@vercel/node@3.0.7"
     }
   },
-  "regions": ["iad1"],
-  "rewrites": [
-    {
-      "source": "/api/gemini",
-      "destination": "/api/gemini"
-    }
-  ]
+  "regions": ["iad1"]
 }
