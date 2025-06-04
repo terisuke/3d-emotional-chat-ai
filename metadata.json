@@ -1,0 +1,5 @@
+{
+  "name": "3D Emotional Chat AI",
+  "description": "A chat application with a 3D character that reacts to emotions, answering company questions based on provided Markdown documents and calendar information using Gemini API.",
+  "requestFramePermissions": []
+}
