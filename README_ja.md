@@ -168,7 +168,7 @@ src/
 
 問題や質問については：
 - リポジトリでissueを作成
-- お問い合わせ: [Cor.incサポート](https://ssgform.com/s/pHF6ro94xGIy)
+- お問い合わせ: [Cor.incサポート](https://cor-jp.com/contact)
 - メール: 企業ウェブサイト経由でお問い合わせ
 
 ---
@@ -178,5 +178,4 @@ src/
 ## 🔗 関連リンク
 
 - [英語版README](README.md)
-- [企業ウェブサイト](https://corweb.co.jp)
-- [AI Cloudia Chat](https://miibo.jp/chat/8b17da34-3051-4645-ad93-1556b02c04cb18f83c6e2b3ea?name=Cloudia)
+- [企業ウェブサイト](https://cor-jp.com)

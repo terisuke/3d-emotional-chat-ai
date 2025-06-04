@@ -168,7 +168,7 @@ The application is configured for deployment on Netlify with:
 
 For issues or questions:
 - Create an issue in the repository
-- Contact: [Cor.inc Support](https://ssgform.com/s/pHF6ro94xGIy)
+- Contact: [Cor.inc Support](https://cor-jp.com/contact)
 - Email: Contact via company website
 
 ---
@@ -178,5 +178,4 @@ For issues or questions:
 ## 🔗 Language Links
 
 - [日本語版README](README_ja.md)
-- [Company Website](https://corweb.co.jp)
-- [AI Cloudia Chat](https://miibo.jp/chat/8b17da34-3051-4645-ad93-1556b02c04cb18f83c6e2b3ea?name=Cloudia)
+- [Company Website](https://cor-jp.com)
