@@ -128,8 +128,13 @@ export class EmotionalCharacter {
         throw new Error('VRM not found in loaded file');
       }
 
-      // Remove unnecessary joints for better performance
-      VRMUtils.removeUnnecessaryJoints(gltf.scene);
+      // Use the newer combineSkeletons for better performance
+      try {
+        VRMUtils.combineSkeletons(gltf.scene);
+      } catch (error) {
+        console.log('combineSkeletons not available, using removeUnnecessaryJoints');
+        VRMUtils.removeUnnecessaryJoints(gltf.scene);
+      }
 
       // Add to scene
       this.scene.add(vrm.scene);

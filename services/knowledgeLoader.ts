@@ -4,8 +4,11 @@ import { extractCompanyURLs } from './urlExtractor';
 
 export const loadCompanyKnowledge = async (): Promise<CompanyKnowledge> => {
   try {
-    // Load company markdown file
-    const companyResponse = await fetch('/company-info/company.md');
+    // Load company markdown file (try both locations)
+    let companyResponse = await fetch('/company.md');
+    if (!companyResponse.ok) {
+      companyResponse = await fetch('/company-info/company.md');
+    }
     let markdownContent = '';
     
     if (companyResponse.ok) {
