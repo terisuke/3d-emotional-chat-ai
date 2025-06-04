@@ -7,13 +7,17 @@ interface CalendarEvent {
 }
 
 const parseICalDate = (dateStr: string): Date => {
+  console.log(`📅 Parsing date string: "${dateStr}" (length: ${dateStr.length})`);
+  
   // Handle both YYYYMMDDTHHMMSSZ and YYYYMMDD formats
   if (dateStr.length === 8) {
     // YYYYMMDD format (all-day event)
     const year = parseInt(dateStr.substr(0, 4));
     const month = parseInt(dateStr.substr(4, 2)) - 1; // Month is 0-indexed
     const day = parseInt(dateStr.substr(6, 2));
-    return new Date(year, month, day);
+    const result = new Date(year, month, day);
+    console.log(`📅 All-day date parsed: ${result.toISOString()}`);
+    return result;
   } else if (dateStr.length === 15 && dateStr.endsWith('Z')) {
     // YYYYMMDDTHHMMSSZ format
     const year = parseInt(dateStr.substr(0, 4));
@@ -22,10 +26,14 @@ const parseICalDate = (dateStr: string): Date => {
     const hour = parseInt(dateStr.substr(9, 2));
     const minute = parseInt(dateStr.substr(11, 2));
     const second = parseInt(dateStr.substr(13, 2));
-    return new Date(Date.UTC(year, month, day, hour, minute, second));
+    const result = new Date(Date.UTC(year, month, day, hour, minute, second));
+    console.log(`📅 UTC date parsed: ${result.toISOString()}`);
+    return result;
   }
   // Fallback to default parsing
-  return new Date(dateStr);
+  const result = new Date(dateStr);
+  console.log(`📅 Fallback date parsed: ${result.toISOString()}`);
+  return result;
 };
 
 const parseICalContent = (icalContent: string): CalendarEvent[] => {
@@ -148,6 +156,12 @@ export const fetchCalendarData = async (icalUrl: string): Promise<string> => {
     
     const upcomingEvents = events
       .filter(event => {
+        // 日付が有効かチェック
+        if (!event.dtstart || isNaN(event.dtstart.getTime())) {
+          console.log(`❌ Invalid date for event: "${event.summary}"`);
+          return false;
+        }
+        
         const isUpcoming = event.dtstart >= now && event.dtstart <= thirtyDaysFromNow;
         console.log(`🔍 Event check: "${event.summary}" at ${event.dtstart.toISOString()} - ${isUpcoming ? 'UPCOMING' : 'NOT upcoming'}`);
         if (isUpcoming) {
