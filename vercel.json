@@ -4,5 +4,7 @@
       "runtime": "@vercel/node@3.0.7"
     }
   },
-  "regions": ["iad1"]
+  "regions": ["iad1"],
+  "buildCommand": "npm run build",
+  "nodeVersion": "18.x"
 }
