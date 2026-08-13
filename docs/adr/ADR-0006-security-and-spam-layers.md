@@ -47,6 +47,7 @@
 
 - 全文無期限保存しない。要約 + 必要フィールド中心。
 - 保存期間・削除は corsweb PP と整合（Issue #12）。
+- 詳細正本（ルール案・PP 更新 Issue リンク）: [../policies/DATA-RETENTION-AND-PP.md](../policies/DATA-RETENTION-AND-PP.md)
 
 ## 理由
 
