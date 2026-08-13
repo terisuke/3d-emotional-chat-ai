@@ -67,7 +67,7 @@
 - [ ] AI 障害時の代替フォーム
 - [ ] AI 出力のスキーマ検証
 - [ ] プロンプトインジェクション対策
-- [ ] 個人情報の保存期間・削除方針
+- [ ] 個人情報の保存期間・削除方針（Cloudia 側 docs: [../policies/DATA-RETENTION-AND-PP.md](../policies/DATA-RETENTION-AND-PP.md)。公開 PP 反映は corsweb [#164](https://github.com/Cor-Incorporated/corsweb2024/issues/164)）
 - [ ] LLM プロバイダ交換可能な Gateway
 - [ ] 簡易管理 or メール Inbox で運用可能であること
 

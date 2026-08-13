@@ -34,7 +34,7 @@
 - 詳細管理画面、FAQ/フロー/spam ルール管理
 - 添付、CRM、カレンダー、分析、判定フィードバック
 - monorepo/vendor カットオーバー（#11）
-- PP・保存方針の最終整合（#12）
+- PP・保存方針の最終整合（#12 → [DATA-RETENTION-AND-PP.md](../policies/DATA-RETENTION-AND-PP.md)、公開 PP は corsweb #164）
 
 ### Phase 3 — 高度化
 

@@ -66,6 +66,7 @@
 ### 保存
 
 - 生会話全文の無期限保存はしない。要約と必要項目を主記録（corsweb PP / ADR-0006）。
+- 詳細: [../policies/DATA-RETENTION-AND-PP.md](../policies/DATA-RETENTION-AND-PP.md)（Issue #12）
 
 ### AI 権限境界
 
