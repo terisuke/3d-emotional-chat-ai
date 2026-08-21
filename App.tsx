@@ -7,6 +7,7 @@ import IntentPicker from './components/IntentPicker';
 import PiiNotice from './components/PiiNotice';
 import HandoffForm, { HandoffValues } from './components/HandoffForm';
 import FallbackNotice from './components/FallbackNotice';
+import FaqResolutionPrompt from './components/FaqResolutionPrompt';
 import { Message, Emotion, ContactIntent, AppMode } from './types';
 import { useLanguage } from './contexts/LanguageContext';
 import { resolveAppMode } from './utils/appMode';
@@ -19,6 +20,7 @@ import {
   toApiMessages,
   type Classification as ApiClassification,
   type StructuredLead,
+  type ChatResult,
 } from './services/contactChatClient';
 
 // Classification re-export helper
@@ -67,6 +69,14 @@ function isAbortError(error: unknown): boolean {
   return error instanceof DOMException && error.name === 'AbortError';
 }
 
+function shouldPromptFaqResolution(result: ChatResult): boolean {
+  return result.faqResolution === 'unresolved';
+}
+
+function isFaqFullyResolved(result: ChatResult): boolean {
+  return result.faqResolution === 'answered';
+}
+
 const App: React.FC = () => {
   const { locale, setLocale, t } = useLanguage();
   const appMode: AppMode = useMemo(() => resolveAppMode(), []);
@@ -99,6 +109,8 @@ const App: React.FC = () => {
   const [apiDegraded, setApiDegraded] = useState(false);
   const [lastFailedInput, setLastFailedInput] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [faqResolved, setFaqResolved] = useState(false);
+  const [showFaqPrompt, setShowFaqPrompt] = useState(false);
   const [activeRequest, setActiveRequest] = useState<'start' | 'chat' | 'submit' | null>(null);
   const requestAbortRef = useRef<AbortController | null>(null);
   const submitLockRef = useRef(false);
@@ -118,6 +130,8 @@ const App: React.FC = () => {
     setConversationSummary('');
     setStructuredLead({});
     setSubmitted(false);
+    setFaqResolved(false);
+    setShowFaqPrompt(false);
     setSessionId(readSessionId(appMode, locale, selectedIntent));
     idempotencyKeyRef.current = uuidv4();
     setIntentStartState('idle');
@@ -174,6 +188,26 @@ const App: React.FC = () => {
     }
   }, [activeRequest]);
 
+  const markFaqResolved = useCallback(() => {
+    setShowFaqPrompt(false);
+    setFaqResolved(true);
+    setReadyForContact(false);
+    setShowHandoff(false);
+    setMessages((prev) => [
+      ...prev,
+      { id: uuidv4(), text: t('faqResolvedThanks'), sender: 'ai', emotion: Emotion.HAPPY },
+    ]);
+    setCurrentEmotion(Emotion.HAPPY);
+  }, [t]);
+
+  const applyFaqResolutionFromResult = useCallback((result: ChatResult) => {
+    if (isFaqFullyResolved(result)) {
+      markFaqResolved();
+      return;
+    }
+    setShowFaqPrompt(shouldPromptFaqResolution(result));
+  }, [markFaqResolved]);
+
   const startConversation = useCallback(async (intent: ContactIntent, requestedSessionId = sessionId) => {
     const attemptKey = `${locale}:${intent}`;
     if (startAttemptRef.current === attemptKey || intentStartState === 'started') return;
@@ -213,6 +247,7 @@ const App: React.FC = () => {
       if (result.readyForContact) {
         setReadyForContact(true);
       }
+      applyFaqResolutionFromResult(result);
       setIntentStartState('started');
       setCurrentEmotion(result.readyForContact ? Emotion.HAPPY : Emotion.ENJOYING);
     } catch (error) {
@@ -224,7 +259,7 @@ const App: React.FC = () => {
     } finally {
       finishRequest(controller);
     }
-  }, [appMode, beginRequest, finishRequest, intentStartState, locale, sessionId]);
+  }, [appMode, applyFaqResolutionFromResult, beginRequest, finishRequest, intentStartState, locale, sessionId]);
 
   const handleSelectIntent = useCallback((intent: ContactIntent) => {
     const requestedSessionId = selectedIntent === intent ? sessionId : null;
@@ -301,6 +336,7 @@ const App: React.FC = () => {
       if (result.readyForContact) {
         setReadyForContact(true);
       }
+      applyFaqResolutionFromResult(result);
       setMessages((prev) => [
         ...prev,
         {
@@ -323,7 +359,7 @@ const App: React.FC = () => {
     } finally {
       finishRequest(controller);
     }
-  }, [beginRequest, chatReady, finishRequest, messages, locale, t, appMode, selectedIntent, submitted, sessionId]);
+  }, [applyFaqResolutionFromResult, beginRequest, chatReady, finishRequest, messages, locale, t, appMode, selectedIntent, submitted, sessionId]);
 
   const handleRetryChat = useCallback(() => {
     if (lastFailedInput) void handleSendMessage(lastFailedInput, true);
@@ -365,6 +401,8 @@ const App: React.FC = () => {
     setApiDegraded(false);
     setLastFailedInput(null);
     setSubmitted(false);
+    setFaqResolved(false);
+    setShowFaqPrompt(false);
     setIntentStartState('idle');
     startAttemptRef.current = null;
     initialIntentFromUrlRef.current = null;
@@ -554,7 +592,18 @@ const App: React.FC = () => {
             )}
           </div>
 
-          {readyForContact && !showHandoff && !submitted && (
+          {showFaqPrompt && !faqResolved && !submitted && (
+            <FaqResolutionPrompt
+              disabled={isLoading}
+              onResolved={markFaqResolved}
+              onUnresolved={() => {
+                setShowFaqPrompt(false);
+                inputRef.current?.focus();
+              }}
+            />
+          )}
+
+          {readyForContact && !showHandoff && !submitted && !faqResolved && !showFaqPrompt && (
             <div className="shrink-0 space-y-2 border-t border-slate-200 bg-white px-4 py-3">
               <p className="text-xs leading-relaxed text-slate-600">{t('readyForContact')}</p>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -587,6 +636,18 @@ const App: React.FC = () => {
             />
           )}
 
+          {faqResolved && (
+            <div className="shrink-0 border-t border-slate-200 bg-white px-4 py-3">
+              <button
+                type="button"
+                className="min-h-11 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+                onClick={handleStartNewConversation}
+              >
+                {t('newConversation')}
+              </button>
+            </div>
+          )}
+
           {submitted && (
             <div className="shrink-0 border-t border-slate-200 bg-white px-4 py-3">
               <button
@@ -599,7 +660,7 @@ const App: React.FC = () => {
             </div>
           )}
 
-          {!showHandoff && !submitted && (
+          {!showHandoff && !submitted && !faqResolved && (
             <div className="sticky bottom-0 shrink-0 border-t border-slate-200 bg-white/95 p-3 backdrop-blur sm:p-4">
               <ChatInput
                 onSendMessage={handleSendMessage}

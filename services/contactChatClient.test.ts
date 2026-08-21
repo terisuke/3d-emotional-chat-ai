@@ -154,6 +154,41 @@ describe('contactChatClient', () => {
     expect(String(error)).not.toContain('503');
   });
 
+  it('preserves faqResolution from the Worker without exposing it in reply text', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      reply: 'Cloudia is Cor. AI reception for B2B inquiries.',
+      classification: 'genuine',
+      readyForContact: false,
+      faqResolution: 'unresolved',
+    }), { status: 200, headers: { 'content-type': 'application/json' } })));
+
+    await expect(postContactChat([{ role: 'user', content: 'What is Cloudia?' }], {
+      mode: 'intake',
+      locale: 'en',
+      intent: 'press-speaking-other',
+    })).resolves.toMatchObject({
+      faqResolution: 'unresolved',
+      reply: 'Cloudia is Cor. AI reception for B2B inquiries.',
+    });
+  });
+
+  it('accepts answered faqResolution for submit-free completion', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      reply: 'You can reach us at the contact form on cor-jp.com.',
+      classification: 'genuine',
+      readyForContact: false,
+      faqResolution: 'answered',
+    }), { status: 200 })));
+
+    await expect(postContactChat([], {
+      mode: 'intake',
+      locale: 'ja',
+      intent: null,
+    })).resolves.toMatchObject({
+      faqResolution: 'answered',
+    });
+  });
+
   it('forwards AbortSignal to chat requests', async () => {
     const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({
       reply: '中断可能です。',
