@@ -51,6 +51,10 @@ export const translations = {
     newConversationConfirm: "Start a new inquiry? The current conversation will be cleared.",
     ambassadorLink: "Chat casually with Cloudia",
     intakeLink: "Return to inquiry reception",
+    faqConfirmQuestion: "Did this answer your question?",
+    faqResolvedYes: "Yes, I'm all set",
+    faqResolvedNo: "No, continue the conversation",
+    faqResolvedThanks: "Glad that helped. You can start a new inquiry anytime if you need more assistance.",
   },
   ja: {
     title: "Cloudia — Cor. AI受付",
@@ -104,6 +108,10 @@ export const translations = {
     newConversationConfirm: "現在の会話を消去して、新しい相談を始めますか？",
     ambassadorLink: "Cloudiaと雑談する",
     intakeLink: "お問い合わせ受付へ戻る",
+    faqConfirmQuestion: "ご質問は解決しましたか？",
+    faqResolvedYes: "はい、解決しました",
+    faqResolvedNo: "いいえ、相談を続ける",
+    faqResolvedThanks: "お役に立ててよかったです。追加のご相談は、いつでも新しい相談からお始めください。",
   },
 };
 
